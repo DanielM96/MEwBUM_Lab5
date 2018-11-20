@@ -61,7 +61,7 @@ guidata(hObject, handles);
 % UIWAIT makes GUI_FanAndSaw wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 evalin('base','clear; clc');
-global selectedObject selectedState availableOptions optionsFan optionsSaw fanData sawData Fs;
+global selectedObject selectedState availableOptions optionsFan optionsSaw fanData sawData Fs cutoff;
 selectedObject = 1;
 selectedState = 1;
 optionsFan = { 'Poziom 1 (najwolniejszy)', 'Poziom 2', 'Poziom 3 (najszybszy)', 'Rozpêd + hamowanie' };
@@ -70,6 +70,7 @@ optionsSaw = { 'Czujnik w górnej czêœci pi³y', 'Czujnik w dolnej czêœci pi³y' };
 availableOptions = optionsFan;
 
 Fs = 25000;
+cutoff = 0;
 
 % tablica danych
 fanData = { 'fan1.mat' 'fan2.mat' 'fan3.mat' 'fan_cycle.mat' };
@@ -205,7 +206,7 @@ ylabel('Amplituda');
 zoom on;
 
 axes(handles.axes3_spectrogram);
-spectrogram(accData,[],[],[],Fs);
+spectrogram(accData,20000,10000,20000,Fs);
 zoom on;
 
 genTime = toc;
@@ -249,13 +250,18 @@ function pushbutton3_a_v_d_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton3_a_v_d (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global accData Fs t timeEnd;
-assignin('base','accData',accData);
-assignin('base','Fs',Fs);
-assignin('base','t',t);
-assignin('base','timeEnd',timeEnd);
-assignin('base','isCalledFromFanAndSaw',true);
-GUI_Kinematics;
+global Fs t timeEnd accData cutoff;
+if cutoff <= 0
+    msgbox('Musisz przefiltrowaæ sygna³, ¿eby zobaczyæ te charakterystyki.','B³¹d','warn');
+else
+    assignin('base','accData',accData);
+    assignin('base','Fs',Fs);
+    assignin('base','t',t);
+    assignin('base','timeEnd',timeEnd);
+    assignin('base','cutoff',cutoff);
+    assignin('base','isCalledFromFanAndSaw',true);
+    GUI_Kinematics;
+end
 
 
 % --- Executes on slider movement.
@@ -357,7 +363,7 @@ function pushbutton4_filter_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton4_filter (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-global accData t timeEnd Fs;
+global accData t timeEnd Fs cutoff;
 cutoff = 30;
 
 pause(0.05);

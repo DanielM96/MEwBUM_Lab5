@@ -69,36 +69,46 @@ else
     Fs = evalin('base','Fs');
     t = evalin('base','t');
     timeEnd = evalin('base','timeEnd');
+    cutoff = evalin('base','cutoff');
+    
+    accData = hipassFilter(accData,cutoff);
+    accData = accData - mean(accData);
+    g = 9.81;
+%     g = 1;
     
     pause(0.05);
     tic;
     % tu bêd¹ wykresy
     axes(handles.axes1_acceleration);
     % plot(t,accData(1:length(t)));
-    plot(t,accData);
+    plot(t,g*accData);
     title('Przyspieszenie');
     xlabel('Czas [s]');
-    ylabel('Wartoœæ [g]');
+    ylabel('Wartoœæ [m/s^2]');
     xlim([ 0 timeEnd ]);
     zoom on;
     
     axes(handles.axes2_velocity);
-    velocity = iomega(accData,1/Fs,3,2);
+%     velocity = iomega(filtData,1/Fs,3,2);
+    velocity = detrend(cumtrapz(t,accData),'linear');
+    velocity = velocity - mean(velocity);
     % plot(t,velocity(1:length(t)));
-    plot(t,velocity);
+    plot(t,g*velocity);
     title('Prêdkoœæ');
     xlabel('Czas [s]');
-    ylabel('Wartoœæ [g]');
+    ylabel('Wartoœæ [mm/s]');
     xlim([ 0 timeEnd ]);
     zoom on;
     
     axes(handles.axes3_displacement);
-    displacement = iomega(accData,1/Fs,3,1);
+%     displacement = iomega(filtData,1/Fs,3,1);
+    displacement = detrend(cumtrapz(t,velocity),'linear');
+    displacement = displacement - mean(displacement);
     % plot(t,displacement(1:length(t)));
-    plot(t,displacement);
+    plot(t,g*displacement);
     title('Przemieszczenie');
     xlabel('Czas [s]');
-    ylabel('Wartoœæ [g]');
+    ylabel('Wartoœæ [mm]');
     xlim([ 0 timeEnd ]);
     zoom on;
     

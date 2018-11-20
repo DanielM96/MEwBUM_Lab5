@@ -26,16 +26,23 @@ if nargin < 1
 else
     if nargin < 2
         cutoff = 30;
-        fs = 25000;
+        Fs = 25000;
     elseif nargin < 3
         cutoff = cutoffFreq;
-        fs = 25000;
+        Fs = 25000;
     else
         cutoff = cutoffFreq;
-        fs = sampleFreq;
+        Fs = sampleFreq;
     end
-    fn = fs/2;
-    [ b, a ] = cheby2(4,45,cutoff/fn,'high');
-    ys = filter(b,a,inputData);
+    
+    % rz¹d filtru
+    N = 4;
+    % t³umienie w paœmie zaporowym [dB]
+    Astop = 80;
+    % projektowanie filtru górnoprzepustowego
+    h  = fdesign.highpass('N,Fst,Ast', N, cutoff, Astop, Fs);
+    Hd = design(h, 'cheby2');
+    % filtrowanie danych
+    ys = filter(Hd,inputData);
     outputData = ys;
 end
